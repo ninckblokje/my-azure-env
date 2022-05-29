@@ -30,6 +30,8 @@ param location string = resourceGroup().location
 
 param subnet string = 'DefaultSubnet'
 
+param vmSize string = 'Standard_B1ls'
+
 resource jnbPublicKey 'Microsoft.Compute/sshPublicKeys@2021-11-01' existing = {
   name: 'jnb-public-key'
 }
@@ -75,7 +77,7 @@ resource jnbUbuntuVm 'Microsoft.Compute/virtualMachines@2021-11-01' = {
   location: location
   properties: {
     hardwareProfile: {
-      vmSize: 'Standard_B1ls'
+      vmSize: vmSize
     }
     storageProfile: {
       osDisk: {
