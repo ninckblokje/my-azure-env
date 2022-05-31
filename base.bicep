@@ -99,6 +99,17 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           ]
         }
       }
+      {
+        name: 'ApimSubnet'
+        properties: {
+          addressPrefix: '10.0.2.0/24'
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: jnbDefaultNsg.id
+          }
+        }
+      }
     ]
   }
 }
