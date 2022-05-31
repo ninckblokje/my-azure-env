@@ -2,10 +2,14 @@
 
 To install Azure bicep for use with Azure Powershell: `winget install -e --id Microsoft.Bicep`
 
+A list of all templates available: https://docs.microsoft.com/en-us/azure/templates/
+
 ## Commands
 
-To preview the modifications the bicep will make to the resource group: `New-AzResourceGroupDeployment -TemplateFile [BICEP_FILE] -ResourceGroupName [RESOURCE_GROUP] -WhatIf`
-To execute the bicep file on a resource group: `New-AzResourceGroupDeployment -TemplateFile [BICEP_FILE] -ResourceGroupName [RESOURCE_GROUP] -Confirm`
+To preview the modifications the bicep will make to the resource group: `New-AzResourceGroupDeployment -TemplateFile [BICEP_FILE] -TemplateParameterFile [PARAM_FILE] -ResourceGroupName [RESOURCE_GROUP] -WhatIf`
+To execute the bicep file on a resource group: `New-AzResourceGroupDeployment -TemplateFile [BICEP_FILE] -TemplateParameterFile [PARAM_FILE] -ResourceGroupName [RESOURCE_GROUP] -Confirm`
+
+To remove everything except the resources from `base.bicep`: `New-AzResourceGroupDeployment -TemplateFile base.bicep -TemplateParameterFile [PARAM_FILE] -ResourceGroupName [RESOURCE_GROUP] -Mode Complete -WhatIf`
 
 ## Parameters
 

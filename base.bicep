@@ -28,6 +28,7 @@ param homeIp string = '127.0.0.1/32'
 
 param location string = resourceGroup().location
 
+@secure()
 param publicKey string = ''
 
 resource jnbPublicKey 'Microsoft.Compute/sshPublicKeys@2021-11-01' = {
@@ -77,6 +78,25 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           networkSecurityGroup: {
             id: jnbDefaultNsg.id
           }
+        }
+      }
+      {
+        name: 'ContainerSubnet'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: jnbDefaultNsg.id
+          }
+          delegations:[
+            {
+              name: 'Microsoft.ContainerInstance.containerGroups'
+              properties: {
+                serviceName: 'Microsoft.ContainerInstance/containerGroups'
+              }
+            }
+          ]
         }
       }
     ]
