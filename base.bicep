@@ -59,6 +59,56 @@ resource allowHomeNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules
   }
 }
 
+resource jnbApimNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
+  name: 'jnb-apim-nsg'
+  location: location
+}
+
+resource ApimHttpNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
+  name: 'ApimHttp'
+  parent: jnbApimNsg
+  properties: {
+    protocol: 'Tcp'
+    sourcePortRange: '*'
+    destinationPortRange: '80'
+    sourceAddressPrefix: homeIp
+    destinationAddressPrefix: 'VirtualNetwork'
+    access: 'Allow'
+    priority: 100
+    direction: 'Inbound'
+  }
+}
+
+resource ApimHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
+  name: 'ApimHttps'
+  parent: jnbApimNsg
+  properties: {
+    protocol: 'Tcp'
+    sourcePortRange: '*'
+    destinationPortRange: '443'
+    sourceAddressPrefix: homeIp
+    destinationAddressPrefix: 'VirtualNetwork'
+    access: 'Allow'
+    priority: 110
+    direction: 'Inbound'
+  }
+}
+
+resource ApimManagementHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
+  name: 'ApimManagementHttps'
+  parent: jnbApimNsg
+  properties: {
+    protocol: 'Tcp'
+    sourcePortRange: '*'
+    destinationPortRange: '3443'
+    sourceAddressPrefix: 'ApiManagement'
+    destinationAddressPrefix: 'VirtualNetwork'
+    access: 'Allow'
+    priority: 120
+    direction: 'Inbound'
+  }
+}
+
 resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
   name: 'jnb-vnet'
   location: location
@@ -106,7 +156,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           privateEndpointNetworkPolicies: 'Enabled'
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
-            id: jnbDefaultNsg.id
+            id: jnbApimNsg.id
           }
         }
       }
