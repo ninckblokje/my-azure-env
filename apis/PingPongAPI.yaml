@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: PingPongAPI
+  description: Retrieves server information using ping - pong
+  license:
+    name: BSD-2-Clause
+    url: https://github.com/ninckblokje/poc-modern-soap/blob/master/LICENSE
+  version: 1.0.0
+externalDocs:
+  description: GitHub project
+  url: https://github.com/ninckblokje/poc-modern-soap
+servers:
+  - url: http://localhost:8081
+paths:
+  /api/ping:
+    get:
+      summary: Retrieves information from server
+      description: Using a ping, retrieves information from a server which replies with a pong
+      operationId: pingpong
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pong'
+components:
+  schemas:
+    Pong:
+      type: object
+      properties:
+        dateTime:
+          type: string
+          format: dateTime
+        client:
+          $ref: '#/components/schemas/ClientInformation'
+        host:
+          $ref: '#/components/schemas/HostInformation'
+        applicationServer:
+          $ref: '#/components/schemas/ApplicationServerInformation'
+    ApplicationServer:
+      type: string
+      enum:
+        - Helidon SE
+        - Helidon MP
+        - Open Liberty
+        - Quarkus
+        - Spring Boot
+    Framework:
+      type: string
+      enum:
+        - Jakarta EE
+        - Spring WS
+    ApplicationServerInformation:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ApplicationServer'
+        framework:
+          $ref: '#/components/schemas/Framework'
+    ClientInformation:
+      type: object
+      properties:
+        ipAddress:
+          type: string
+    HostInformation:
+      type: object
+      properties:
+        hostName:
+          type: string
+        architecture:
+          type: string
+        operatingSystem:
+          type: string
