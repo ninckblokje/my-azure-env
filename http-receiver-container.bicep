@@ -24,67 +24,40 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-param location string = resourceGroup().location
-
-param subnet string = 'ContainerSubnet'
-
-resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
-  name: 'jnb-vnet'
-}
-
-resource httpReceiverContainerGroup 'Microsoft.ContainerInstance/containerGroups@2021-10-01' = {
-  name: 'jnb-http-receiver-container-group'
-  location: location
+output container object = {
+  name: 'jnb-http-receiver-container'
   properties: {
-    containers: [
+    image: 'ninckblokje/http-receiver:latest'
+    resources: {
+      requests: {
+        cpu: 1
+        memoryInGB: 1
+      }
+    }
+    environmentVariables: [
       {
-        name: 'jnb-http-receiver-container'
-        properties: {
-          image: 'ninckblokje/http-receiver:latest'
-          resources: {
-            requests: {
-              cpu: 1
-              memoryInGB: 1
-            }
-          }
-          environmentVariables: [
-            {
-              name: 'HTTP_RECEIVER_PORT'
-              value: '443'
-            }
-            {
-              name: 'HTTP_RECEIVER_PFX_STORE_PATH'
-              value: 'server.pfx'
-            }
-            {
-              name: 'HTTP_RECEIVER_PFX_STORE_PASSWORD'
-              secureValue: 'Dummy_123'
-            }
-          ]
-          ports: [
-            {
-              port: 443
-              protocol: 'TCP'
-            }
-          ]
-        }
+        name: 'HTTP_RECEIVER_PORT'
+        value: '443'
+      }
+      {
+        name: 'HTTP_RECEIVER_PFX_STORE_PATH'
+        value: 'server.pfx'
+      }
+      {
+        name: 'HTTP_RECEIVER_PFX_STORE_PASSWORD'
+        secureValue: 'Dummy_123'
       }
     ]
-    osType: 'Linux'
-    restartPolicy: 'OnFailure'
-    ipAddress: {
-      type: 'Private'
-      ports: [
-        {
-          port: 443
-          protocol: 'TCP'
-        }
-      ]
-    }
-    subnetIds:[
+    ports: [
       {
-        id: '${jnbVnet.id}/subnets/${subnet}'
+        port: 443
+        protocol: 'TCP'
       }
     ]
   }
+}
+
+output containerPort object = {
+  port: 443
+  protocol: 'TCP'
 }
