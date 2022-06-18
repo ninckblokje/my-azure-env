@@ -65,7 +65,7 @@ resource jnbApimNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
 }
 
 resource ApimHttpNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'ApimHttp'
+  name: 'apim-http-rule'
   parent: jnbApimNsg
   properties: {
     protocol: 'Tcp'
@@ -80,7 +80,7 @@ resource ApimHttpNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@
 }
 
 resource ApimHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'ApimHttps'
+  name: 'apim-https-rule'
   parent: jnbApimNsg
   properties: {
     protocol: 'Tcp'
@@ -95,7 +95,7 @@ resource ApimHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules
 }
 
 resource ApimManagementHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'ApimManagementHttps'
+  name: 'apim-management-https-rule'
   parent: jnbApimNsg
   properties: {
     protocol: 'Tcp'
