@@ -21,3 +21,13 @@ A template file can be specified with configuration parameters.
 |-|-|-|
 | homeIp | 127.0.0.1/32 | IP address to whitelist |
 | publicKey | | Public key for SSH access |
+
+## 
+
+````
+terraform init
+terraform refresh
+terraform plan -var-file="[VAR_FILE]"
+terraform apply -var-file="[VAR_FILE]"
+terraform import [RESOURCE].[NAME] [URI]
+````
