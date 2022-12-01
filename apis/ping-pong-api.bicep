@@ -34,6 +34,8 @@ resource jnbPingPongApi 'Microsoft.ApiManagement/service/apis@2021-08-01' = {
   properties:{
     displayName: 'PingPongAPI'
     description: 'Retrieves server information using ping - pong'
+    format: 'openapi'
+    value: loadTextContent('PingPongAPI.yaml')
     path: ''
     protocols: [
       'https'
@@ -61,6 +63,9 @@ resource jnbPingPongProduct 'Microsoft.ApiManagement/service/products@2021-08-01
 resource jnbPingPongProductApi 'Microsoft.ApiManagement/service/products/apis@2021-08-01' = {
   name: 'ping-pong-api'
   parent: jnbPingPongProduct
+  dependsOn: [
+    jnbPingPongApi
+  ]
 }
 
 resource jnbPingPongProductDeveloperGroup 'Microsoft.ApiManagement/service/products/groups@2021-08-01' = {

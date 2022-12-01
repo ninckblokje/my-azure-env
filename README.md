@@ -21,3 +21,20 @@ A template file can be specified with configuration parameters.
 |-|-|-|
 | homeIp | 127.0.0.1/32 | IP address to whitelist |
 | publicKey | | Public key for SSH access |
+
+Example `base.params.json` file:
+
+````json
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "homeIp": {
+            "value": "127.0.0.1/32"
+        },
+        "publicKey": {
+            "value": ""
+        }
+    }
+}
+````
