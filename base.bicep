@@ -160,6 +160,17 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           }
         }
       }
+      {
+        name: 'ContainerAppsSubnet'
+        properties: {
+          addressPrefix: '10.0.4.0/23'
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: jnbDefaultNsg.id
+          }
+        }
+      }
     ]
   }
 }

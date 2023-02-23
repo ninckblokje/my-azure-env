@@ -1,5 +1,5 @@
 /*  
-  Copyright (c) 2022, ninckblokje
+  Copyright (c) 2023, ninckblokje
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without
@@ -24,40 +24,34 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-output container object = {
-  name: 'jnb-http-receiver-container'
+param location string = resourceGroup().location
+
+resource jnbLogAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
+  name: 'jnb-log-analytics'
+}
+
+resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
+  name: 'jnb-vnet'
+}
+
+resource jnbContainerAppsEnv 'Microsoft.App/managedEnvironments@2022-03-01' = {
+  name: 'jnb-container-apps-env'
+  location: location
   properties: {
-    image: 'ninckblokje/http-receiver:latest'
-    resources: {
-      requests: {
-        cpu: 1
-        memoryInGB: 1
+    vnetConfiguration: {
+      internal: true
+      infrastructureSubnetId: '${jnbVnet.id}/subnets/ContainerAppsSubnet'
+    }
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: reference(jnbLogAnalytics.id, '2022-10-01').customerId
+        sharedKey: listKeys(jnbLogAnalytics.id, '2022-10-01').primarySharedKey
       }
     }
-    environmentVariables: [
-      {
-        name: 'HTTP_RECEIVER_PORT'
-        value: '443'
-      }
-      {
-        name: 'HTTP_RECEIVER_PFX_STORE_PATH'
-        value: 'server.pfx'
-      }
-      {
-        name: 'HTTP_RECEIVER_PFX_STORE_PASSWORD'
-        secureValue: 'Dummy_123'
-      }
-    ]
-    ports: [
-      {
-        port: 443
-        protocol: 'TCP'
-      }
-    ]
   }
 }
 
-output containerPort object = {
-  port: 443
-  protocol: 'TCP'
-}
+output jnbContainerAppsId string = jnbContainerAppsEnv.id
+output jnbContainerAppsDomainName string = jnbContainerAppsEnv.properties.defaultDomain
+output jnbContainerAppsIpAddress string = jnbContainerAppsEnv.properties.staticIp
