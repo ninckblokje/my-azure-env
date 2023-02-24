@@ -38,3 +38,21 @@ Example `base.params.json` file:
     }
 }
 ````
+
+### keyvault.bicep parameters
+
+| Parameter | Default value | Description |
+|-|-|-|
+| tenantId | | Tenant Id |
+
+````json
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "tenantId": {
+            "value": ""
+        }
+    }
+}
+````
