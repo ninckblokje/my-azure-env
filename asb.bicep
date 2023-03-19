@@ -26,10 +26,13 @@
 
 param location string = resourceGroup().location
 
-resource jnbAsb 'Microsoft.ServiceBus/namespaces@2021-11-01' = {
+resource jnbAsb 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = {
   name: 'jnb-asb'
   location: location
   sku: {
     name: 'Standard'
+  }
+  properties: {
+    minimumTlsVersion: '1.2'
   }
 }
