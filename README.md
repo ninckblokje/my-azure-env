@@ -4,6 +4,13 @@ To install Azure bicep for use with Azure Powershell: `winget install -e --id Mi
 
 A list of all templates available: https://docs.microsoft.com/en-us/azure/templates/
 
+## devcontainer
+
+This repository provides a devcontainer with PowerShell, Azure CLI and Azure PowerShell. Login using one of the following commands.
+
+For Azure CLI: `az login --use-device-code`
+For Azure PowerShell: `Connect-AzAccount -UseDeviceAuthentication`
+
 ## Commands
 
 To preview the modifications the bicep will make to the resource group: `New-AzResourceGroupDeployment -TemplateFile [BICEP_FILE] -TemplateParameterFile [PARAM_FILE] -ResourceGroupName [RESOURCE_GROUP] -WhatIf`
