@@ -109,6 +109,26 @@ resource ApimManagementHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/sec
   }
 }
 
+resource jnbWafNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
+  name: 'jnb-waf-nsg'
+  location: location
+}
+
+resource WafManagementNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2023-09-01' = {
+  name: 'waf-management-rule'
+  parent: jnbWafNsg
+  properties: {
+    access: 'Allow'
+    direction: 'Inbound'
+    priority: 100
+    protocol: 'Tcp'
+    sourceAddressPrefix: 'GatewayManager'
+    sourcePortRange: '*'
+    destinationAddressPrefix: '*'
+    destinationPortRange: '65200-65535'
+  }
+}
+
 resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
   name: 'jnb-vnet'
   location: location
@@ -157,6 +177,17 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           privateLinkServiceNetworkPolicies: 'Enabled'
           networkSecurityGroup: {
             id: jnbApimNsg.id
+          }
+        }
+      }
+      {
+        name: 'WafSubnet'
+        properties: {
+          addressPrefix: '10.0.3.0/24'
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+          networkSecurityGroup: {
+            id: jnbWafNsg.id
           }
         }
       }
