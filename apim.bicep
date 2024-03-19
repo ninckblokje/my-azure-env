@@ -36,6 +36,10 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
   name: 'jnb-vnet'
 }
 
+resource jnbLogAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
+  name: 'jnb-log-analytics'
+}
+
 resource jnbApimPip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   name: 'jnb-apim-pip'
   location: location
@@ -67,5 +71,43 @@ resource jnbApim 'Microsoft.ApiManagement/service@2021-08-01' = {
       subnetResourceId: '${jnbVnet.id}/subnets/${subnet}'
     }
     publicIpAddressId: jnbApimPip.id
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource jnbApimDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'jnb-apim-diagnostic-settings'
+  scope: jnbApim
+  properties: {
+    workspaceId: jnbLogAnalytics.id
+    logs: [
+      {
+        categoryGroup: 'audit'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+      }
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+      }
+    ]
+    metrics: [
+      {
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: false
+        }
+        category: 'AllMetrics'
+      }
+    ]
+    logAnalyticsDestinationType: 'Dedicated'
   }
 }
