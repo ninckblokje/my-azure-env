@@ -42,90 +42,123 @@ resource jnbPublicKey 'Microsoft.Compute/sshPublicKeys@2021-11-01' = {
 resource jnbDefaultNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: 'jnb-default-nsg'
   location: location
-}
 
-resource allowHomeNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'allow-home-rule'
-  parent: jnbDefaultNsg
-  properties: {
-    protocol: '*'
-    sourcePortRange: '*'
-    destinationPortRange: '*'
-    sourceAddressPrefix: homeIp
-    destinationAddressPrefix: '*'
-    access: 'Allow'
-    priority: 100
-    direction: 'Inbound'
+  resource allowHomeNsgRule 'securityRules' = {
+    name: 'allow-home-rule'
+    properties: {
+      protocol: '*'
+      sourcePortRange: '*'
+      destinationPortRange: '*'
+      sourceAddressPrefixes: [
+        homeIp
+      ]
+      destinationAddressPrefix: '*'
+      access: 'Allow'
+      priority: 100
+      direction: 'Inbound'
+    }
   }
 }
 
 resource jnbApimNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: 'jnb-apim-nsg'
   location: location
-}
 
-resource ApimHttpNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'apim-http-rule'
-  parent: jnbApimNsg
-  properties: {
-    protocol: 'Tcp'
-    sourcePortRange: '*'
-    destinationPortRange: '80'
-    sourceAddressPrefix: homeIp
-    destinationAddressPrefix: 'VirtualNetwork'
-    access: 'Allow'
-    priority: 100
-    direction: 'Inbound'
+  resource ApimHttpNsgRule 'securityRules' = {
+    name: 'apim-http-rule'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '80'
+      sourceAddressPrefixes: [
+        homeIp
+      ]
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 100
+      direction: 'Inbound'
+    }
   }
-}
 
-resource ApimHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'apim-https-rule'
-  parent: jnbApimNsg
-  properties: {
-    protocol: 'Tcp'
-    sourcePortRange: '*'
-    destinationPortRange: '443'
-    sourceAddressPrefix: homeIp
-    destinationAddressPrefix: 'VirtualNetwork'
-    access: 'Allow'
-    priority: 110
-    direction: 'Inbound'
+  resource ApimHttpsNsgRule 'securityRules' = {
+    name: 'apim-https-rule'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '443'
+      sourceAddressPrefixes: [
+        homeIp
+      ]
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 110
+      direction: 'Inbound'
+    }
   }
-}
 
-resource ApimManagementHttpsNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2021-08-01' = {
-  name: 'apim-management-https-rule'
-  parent: jnbApimNsg
-  properties: {
-    protocol: 'Tcp'
-    sourcePortRange: '*'
-    destinationPortRange: '3443'
-    sourceAddressPrefix: 'ApiManagement'
-    destinationAddressPrefix: 'VirtualNetwork'
-    access: 'Allow'
-    priority: 120
-    direction: 'Inbound'
+  resource ApimManagementHttpsNsgRule 'securityRules' = {
+    name: 'apim-management-https-rule'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '3443'
+      sourceAddressPrefix: 'ApiManagement'
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 120
+      direction: 'Inbound'
+    }
   }
 }
 
 resource jnbWafNsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' = {
   name: 'jnb-waf-nsg'
   location: location
-}
 
-resource WafManagementNsgRule 'Microsoft.Network/networkSecurityGroups/securityRules@2023-09-01' = {
-  name: 'waf-management-rule'
-  parent: jnbWafNsg
-  properties: {
-    access: 'Allow'
-    direction: 'Inbound'
-    priority: 100
-    protocol: 'Tcp'
-    sourceAddressPrefix: 'GatewayManager'
-    sourcePortRange: '*'
-    destinationAddressPrefix: '*'
-    destinationPortRange: '65200-65535'
+  resource WafHttpNsgRule 'securityRules' = {
+    name: 'waf-http-rule'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '80'
+      sourceAddressPrefixes: [
+        homeIp
+      ]
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 100
+      direction: 'Inbound'
+    }
+  }
+
+  resource WafHttpsNsgRule 'securityRules' = {
+    name: 'waf-https-rule'
+    properties: {
+      protocol: 'Tcp'
+      sourcePortRange: '*'
+      destinationPortRange: '443'
+      sourceAddressPrefixes: [
+        homeIp
+      ]
+      destinationAddressPrefix: 'VirtualNetwork'
+      access: 'Allow'
+      priority: 110
+      direction: 'Inbound'
+    }
+  }
+
+  resource WafManagementNsgRule 'securityRules' = {
+    name: 'waf-management-rule'
+    properties: {
+      access: 'Allow'
+      direction: 'Inbound'
+      priority: 120
+      protocol: 'Tcp'
+      sourceAddressPrefix: 'GatewayManager'
+      sourcePortRange: '*'
+      destinationAddressPrefix: '*'
+      destinationPortRange: '65200-65535'
+    }
   }
 }
 
@@ -189,6 +222,11 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           networkSecurityGroup: {
             id: jnbWafNsg.id
           }
+          // applicationGatewayIpConfigurations: [
+          //   {
+          //     id: resourceId('Microsoft.Network/applicationGateways/gatewayIPConfigurations', 'jnb-waf', 'appGatewayIpConfig')
+          //   }
+          // ]
         }
       }
       {
