@@ -1,17 +1,17 @@
-/*  
-  Copyright (c) 2022, ninckblokje
+/*
+  Copyright (c) 2024, ninckblokje
   All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
-  
+
   * Redistributions of source code must retain the above copyright notice, this
     list of conditions and the following disclaimer.
-  
+
   * Redistributions in binary form must reproduce the above copyright notice,
     this list of conditions and the following disclaimer in the documentation
     and/or other materials provided with the distribution.
-  
+
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,30 +26,18 @@
 
 param location string = resourceGroup().location
 
-param homeIp string = '127.0.0.1/32'
-param vnetIpRange string = '10.0.0.0/16'
-param wafPrivateIpAddress string = '10.0.3.254'
-
-@secure()
-param publicKey string = ''
-
-resource jnbPublicKey 'Microsoft.Compute/sshPublicKeys@2021-11-01' = {
-  name: 'jnb-public-key'
+resource jnbWafPip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
+  name: 'jnb-waf-pip'
   location: location
   properties: {
-    publicKey: publicKey
+    dnsSettings: {
+      domainNameLabel: 'jnb-waf'
+      fqdn: 'jnb-waf.westeurope.cloudapp.azure.com'
+    }
+    publicIPAllocationMethod: 'Static'
   }
-}
-
-module jnbPipModule 'pip.bicep' = {
-  name: 'jnb-pip-module'
-}
-
-module jnbNsgModule 'nsg.bicep' = {
-  name: 'jnb-nsg-module'
-  params: {
-    homeIp: homeIp
-    vnetIpRange: vnetIpRange
-    wafPrivateIpAddress: wafPrivateIpAddress
+  sku: {
+    name: 'Standard'
+    tier: 'Regional'
   }
 }

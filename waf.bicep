@@ -25,30 +25,18 @@
 */
 param location string = resourceGroup().location
 
-param subnet string = 'WafSubnet'
+param wafPrivateIpAddress string = '10.0.3.254'
 
-resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
+resource jnbVnet 'Microsoft.Network/virtualNetworks@2023-11-01' existing = {
   name: 'jnb-vnet'
+}
+
+resource jnbWafPip 'Microsoft.Network/publicIPAddresses@2021-08-01' existing = {
+  name: 'jnb-waf-pip'
 }
 
 resource jnbLogAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
   name: 'jnb-log-analytics'
-}
-
-resource jnbWafPip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
-  name: 'jnb-waf-pip'
-  location: location
-  properties: {
-    dnsSettings: {
-      domainNameLabel: 'jnb-waf'
-      fqdn: 'jnb-waf.westeurope.cloudapp.azure.com'
-    }
-    publicIPAllocationMethod: 'Static'
-  }
-  sku: {
-    name: 'Standard'
-    tier: 'Regional'
-  }
 }
 
 resource jnbWafPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies@2023-09-01' = {
@@ -79,9 +67,10 @@ resource jnbWafPolicy 'Microsoft.Network/ApplicationGatewayWebApplicationFirewal
   }
 }
 
-resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
+resource jnbWaf 'Microsoft.Network/applicationGateways@2023-11-01' = {
   location: location
   name: 'jnb-waf'
+  // dependsOn: [ jnbVnet, jnbWafNsg ]
   properties: {
     sku: {
       capacity: 1
@@ -93,7 +82,7 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
         name: 'appGatewayIpConfig'
         properties: {
           subnet: {
-            id: '${jnbVnet.id}/subnets/${subnet}'
+            id: '${jnbVnet.id}/subnets/WafSubnet'
           }
         }
       }
@@ -106,9 +95,18 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
       {
         name: 'appGwPublicFrontendIpIPv4'
         properties: {
-          privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
             id: jnbWafPip.id
+          }
+        }
+      }
+      {
+        name: 'appGwPrivateFrontendIpIPv4'
+        properties: {
+          privateIPAllocationMethod: 'Static'
+          privateIPAddress: wafPrivateIpAddress
+          subnet: {
+            id: '${jnbVnet.id}/subnets/WafSubnet'
           }
         }
       }
@@ -123,7 +121,7 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
     ]
     backendAddressPools: [
       {
-        name: 'Default'
+        name: 'DefaultBackend'
         properties: {
           backendAddresses: []
         }
@@ -134,10 +132,10 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
       {
         name: 'DefaultBackendSettings'
         properties: {
-          port: 80
-          protocol: 'Http'
+          port: 443
+          protocol: 'Https'
           cookieBasedAffinity: 'Disabled'
-          pickHostNameFromBackendAddress: false
+          pickHostNameFromBackendAddress: true
           requestTimeout: 20
         }
       }
@@ -145,10 +143,25 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
     backendSettingsCollection: []
     httpListeners: [
       {
-        name: 'DefaultListener'
+        name: 'DefaultPublicListener'
         properties: {
           frontendIPConfiguration: {
             id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', 'jnb-waf', 'appGwPublicFrontendIpIPv4')
+          }
+          frontendPort: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', 'jnb-waf', 'port_80')
+          }
+          protocol: 'Http'
+          hostNames: []
+          requireServerNameIndication: false
+          customErrorConfigurations: []
+        }
+      }
+      {
+        name: 'DefaultPrivateListener'
+        properties: {
+          frontendIPConfiguration: {
+            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', 'jnb-waf', 'appGwPrivateFrontendIpIPv4')
           }
           frontendPort: {
             id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', 'jnb-waf', 'port_80')
@@ -164,15 +177,31 @@ resource jnbWaf 'Microsoft.Network/applicationGateways@2023-09-01' = {
     urlPathMaps: []
     requestRoutingRules: [
       {
-        name: 'DefaultRule'
+        name: 'DefaultPrivateRule'
         properties: {
           ruleType: 'Basic'
           priority: 100
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', 'jnb-waf', 'DefaultListener')
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', 'jnb-waf', 'DefaultPrivateListener')
           }
           backendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', 'jnb-waf', 'Default')
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', 'jnb-waf', 'DefaultBackend')
+          }
+          backendHttpSettings: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', 'jnb-waf', 'DefaultBackendSettings')
+          }
+        }
+      }
+      {
+        name: 'DefaultPublicRule'
+        properties: {
+          ruleType: 'Basic'
+          priority: 110
+          httpListener: {
+            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', 'jnb-waf', 'DefaultPublicListener')
+          }
+          backendAddressPool: {
+            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', 'jnb-waf', 'DefaultBackend')
           }
           backendHttpSettings: {
             id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', 'jnb-waf', 'DefaultBackendSettings')
