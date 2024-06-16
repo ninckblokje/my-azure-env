@@ -64,6 +64,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
 
   resource jnbContainerSubnet 'subnets' = {
     name: 'ContainerSubnet'
+    dependsOn: [ jnbDefaultSubnet ]
     properties: {
       addressPrefix: '10.0.1.0/24'
       privateEndpointNetworkPolicies: 'Enabled'
@@ -84,6 +85,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
 
   resource jnbApimSubnet 'subnets' = {
     name: 'ApimSubnet'
+    dependsOn: [ jnbContainerSubnet ]
     properties: {
       addressPrefix: '10.0.2.0/24'
       privateEndpointNetworkPolicies: 'Enabled'
@@ -96,6 +98,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
 
   resource jnbWafSubnet 'subnets' = {
     name: 'WafSubnet'
+    dependsOn: [ jnbApimSubnet ]
     properties: {
       addressPrefix: '10.0.3.0/24'
       privateEndpointNetworkPolicies: 'Disabled'
@@ -108,6 +111,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
 
   resource jnbContainerAppsSubnet 'subnets' = {
     name: 'ContainerAppsSubnet'
+    dependsOn: [ jnbWafSubnet ]
     properties: {
       addressPrefix: '10.0.4.0/23'
       privateEndpointNetworkPolicies: 'Disabled'
