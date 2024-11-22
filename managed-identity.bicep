@@ -1,5 +1,5 @@
 /*  
-  Copyright (c) 2023, ninckblokje
+  Copyright (c) 2024, ninckblokje
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without
@@ -26,63 +26,7 @@
 
 param location string = resourceGroup().location
 
-param tenantId string
-
-param minePrincipalId string
-
-resource jnbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+resource jnbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: 'jnb-managed-identity'
-}
-
-resource jnbKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: 'jnb-key-vault'
   location: location
-  properties: {
-    enabledForDeployment: true
-    enabledForDiskEncryption: true
-    enabledForTemplateDeployment: true
-    enableRbacAuthorization: false
-    enableSoftDelete: true
-    publicNetworkAccess: 'Enabled'
-    accessPolicies: [
-      {
-        tenantId: tenantId
-        objectId: minePrincipalId
-        permissions: {
-          keys: [
-            'all'
-          ]
-          secrets: [
-            'all'
-          ]
-          certificates: [
-            'all'
-          ]
-        }
-      }
-      {
-        tenantId: tenantId
-        objectId: jnbManagedIdentity.properties.principalId
-        permissions: {
-          keys: [
-            'get'
-            'list'
-          ]
-          secrets: [
-            'get'
-            'list'
-          ]
-          certificates: [
-            'get'
-            'list'
-          ]
-        }
-      }
-    ]
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    tenantId: tenantId
-  }
 }

@@ -121,4 +121,21 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
       }
     }
   }
+  resource jnbAsbSubnet 'subnets' = {
+    name: 'AsbSubnet'
+    dependsOn: [ jnbContainerAppsSubnet ]
+    properties: {
+      addressPrefix: '10.0.6.0/24'
+      privateEndpointNetworkPolicies: 'Disabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: jnbDefaultNsg.id
+      }
+      serviceEndpoints: [
+        {
+          service: 'Microsoft.ServiceBus'
+        }
+      ]
+    }
+  }
 }

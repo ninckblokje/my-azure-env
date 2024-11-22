@@ -53,3 +53,7 @@ module jnbNsgModule 'nsg.bicep' = {
     wafPrivateIpAddress: wafPrivateIpAddress
   }
 }
+
+module jnbManagementIdentityModule 'managed-identity.bicep' = {
+  name: 'jnb-management-identity-module'
+}
