@@ -22,6 +22,30 @@ To remove everything except the resources from `base.bicep`: `New-AzResourceGrou
 
 A template file can be specified with configuration parameters.
 
+### aks.bicep parameters
+
+| Parameter | Default value | Description |
+|-|-|-|
+| homeIp | 127.0.0.1/32 | IP address to whitelist |
+| publicKey | | Public key for SSH access |
+
+Example `aks.params.json` file:
+
+````json
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "homeIp": {
+            "value": "127.0.0.1/32"
+        },
+        "publicKey": {
+            "value": ""
+        }
+    }
+}
+````
+
 ### base.bicep parameters
 
 | Parameter | Default value | Description |

@@ -121,6 +121,7 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
       }
     }
   }
+
   resource jnbAsbSubnet 'subnets' = {
     name: 'AsbSubnet'
     dependsOn: [ jnbContainerAppsSubnet ]
@@ -136,6 +137,45 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           service: 'Microsoft.ServiceBus'
         }
       ]
+    }
+  }
+
+  resource jnbAksPodSubnet 'subnets' = {
+    name: 'AksPodSubnet'
+    dependsOn: [ jnbAsbSubnet ]
+    properties: {
+      addressPrefix: '10.0.7.0/24'
+      privateEndpointNetworkPolicies: 'Disabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: jnbDefaultNsg.id
+      }
+    }
+  }
+
+  resource jnbAksPoolSubnet 'subnets' = {
+    name: 'AksPoolSubnet'
+    dependsOn: [ jnbAksPodSubnet ]
+    properties: {
+      addressPrefix: '10.0.8.0/24'
+      privateEndpointNetworkPolicies: 'Disabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: jnbDefaultNsg.id
+      }
+    }
+  }
+
+  resource jnbAksServiceSubnet 'subnets' = {
+    name: 'AksServiceSubnet'
+    dependsOn: [ jnbAksPoolSubnet ]
+    properties: {
+      addressPrefix: '10.0.9.0/24'
+      privateEndpointNetworkPolicies: 'Disabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: jnbDefaultNsg.id
+      }
     }
   }
 }
