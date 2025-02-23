@@ -55,6 +55,17 @@ resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
     oidcIssuerProfile: {
       enabled: true
     }
+    servicePrincipalProfile: {
+      clientId: 'msi'
+    }
+    addonProfiles: {
+      azureKeyvaultSecretsProvider: {
+        enabled: true
+      }
+      extensionManager: {
+        enabled: true
+      }
+    }
     dnsPrefix: 'jnb-aks'
     publicNetworkAccess: 'Enabled'
     networkProfile: {
@@ -91,6 +102,17 @@ resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
             keyData: publicKey
           }
         ]
+      }
+    }
+    storageProfile: {
+      diskCSIDriver: {
+        enabled: true
+      }
+      fileCSIDriver: {
+        enabled: true
+      }
+      snapshotController: {
+        enabled: true
       }
     }
   }
