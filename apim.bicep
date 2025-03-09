@@ -105,11 +105,66 @@ resource jnbApim 'Microsoft.ApiManagement/service@2021-08-01' = {
     }
   }
 
+  resource instrumentationKey 'namedValues' = {
+    name: '67cd83e7217d20046c92c63c'
+    properties: {
+      displayName: 'Logger-Credentials--67cd83e7217d20046c92c63d'
+      secret: true
+      keyVault: {
+        identityClientId: jnbManagedIdentity.properties.clientId
+        secretIdentifier: 'https://jnb-key-vault.vault.azure.net/secrets/instrumentation-key'
+      }
+    }
+  }
+
   resource jnbApplicationInsightsLogger 'loggers' = {
     name: 'jnb-application-insights'
     properties: {
       loggerType: 'applicationInsights'
+      credentials: {
+        instrumentationKey: '{{Logger-Credentials--67cd83e7217d20046c92c63d}}'
+      }
+      isBuffered: true
       resourceId: jnbApplicationInsights.id
+    }
+  }
+
+  resource jnbApplicationInsightsDiagnostics 'diagnostics' = {
+    name: 'applicationinsights'
+    properties: {
+      loggerId: jnbApplicationInsights.id
+      alwaysLog: 'allErrors'
+      httpCorrelationProtocol: 'W3C'
+      logClientIp: true
+      sampling: {
+        percentage: 100
+        samplingType: 'fixed'
+      }
+      verbosity: 'information'
+      backend: {
+        request: {
+          body: {
+            bytes: 0
+          }
+        }
+        response: {
+          body: {
+            bytes: 0
+          }
+        }
+      }
+      frontend: {
+        request: {
+          body: {
+            bytes: 0
+          }
+        }
+        response: {
+          body: {
+            bytes: 0
+          }
+        }
+      }
     }
   }
 }
