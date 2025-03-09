@@ -40,6 +40,14 @@ resource jnbLogAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' e
   name: 'jnb-log-analytics'
 }
 
+resource jnbApplicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: 'jnb-application-insights'
+}
+
+resource jnbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'jnb-managed-identity'
+}
+
 resource jnbApimPip 'Microsoft.Network/publicIPAddresses@2021-08-01' = {
   name: 'jnb-apim-pip'
   location: location
@@ -72,6 +80,37 @@ resource jnbApim 'Microsoft.ApiManagement/service@2021-08-01' = {
     }
     publicIpAddressId: jnbApimPip.id
     publicNetworkAccess: 'Enabled'
+    customProperties: {
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_CBC_SHA256': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_128_GCM_SHA256': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA': 'False'
+      'Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TLS_RSA_WITH_AES_256_CBC_SHA256': 'False'
+    }
+  }
+  identity: {
+    type: 'SystemAssigned, UserAssigned'
+    userAssignedIdentities: {
+      '${jnbManagedIdentity.id}': {}
+    }
+  }
+
+  resource jnbApplicationInsightsLogger 'loggers' = {
+    name: 'jnb-application-insights'
+    properties: {
+      loggerType: 'applicationInsights'
+      resourceId: jnbApplicationInsights.id
+    }
   }
 }
 
@@ -111,3 +150,12 @@ resource jnbApimDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-0
     logAnalyticsDestinationType: 'Dedicated'
   }
 }
+
+// resource jnbManagedIdentityServiceReaderAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: 'jnb-managed-identity-service-reader-assignment'
+//   scope: jnbApim
+//   properties: {
+//     principalId: jnbManagedIdentity.properties.principalId
+//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '71522526-b88f-4d52-b57f-d31fc3546d0d')
+//   }
+// }

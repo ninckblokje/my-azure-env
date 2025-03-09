@@ -44,3 +44,19 @@ resource jnbLogAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' =
     publicNetworkAccessForQuery: 'Enabled'
   }
 }
+
+resource jnbApplicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: 'jnb-application-insights'
+  location: location
+  properties: {
+    Application_Type: 'web'
+    Flow_Type: 'Redfield'
+    IngestionMode: 'LogAnalytics'
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+    Request_Source: 'IbizaAIExtension'
+    RetentionInDays: 90
+    WorkspaceResourceId: jnbLogAnalytics.id
+  }
+  kind: 'web'
+}

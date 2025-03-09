@@ -1,5 +1,5 @@
 /*  
-  Copyright (c) 2022, ninckblokje
+  Copyright (c) 2025, ninckblokje
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,28 @@
 
 param location string = resourceGroup().location
 
-param homeIp string = '127.0.0.1/32'
-param vnetIpRange string = '10.0.0.0/16'
-param wafPrivateIpAddress string = '10.0.3.254'
+resource jnbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'jnb-managed-identity'
+}
 
-@secure()
-param publicKey string = ''
-
-resource jnbPublicKey 'Microsoft.Compute/sshPublicKeys@2021-11-01' = {
-  name: 'jnb-public-key'
+resource jnbApiCenter 'Microsoft.ApiCenter/services@2024-06-01-preview' = {
+  name: 'jnb-api-center'
   location: location
-  properties: {
-    publicKey: publicKey
+  sku: {
+    name: 'Free'
   }
-}
-
-module jnbPipModule 'pip.bicep' = {
-  name: 'jnb-pip-module'
-}
-
-module jnbNsgModule 'nsg.bicep' = {
-  name: 'jnb-nsg-module'
-  params: {
-    homeIp: homeIp
-    vnetIpRange: vnetIpRange
-    wafPrivateIpAddress: wafPrivateIpAddress
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${jnbManagedIdentity.id}': {}
+    }
   }
-}
 
-module jnbManagementIdentityModule 'managed-identity.bicep' = {
-  name: 'jnb-management-identity-module'
-}
-
-module jnbLogAnalyticsModule 'log-analytics.bicep' = {
-  name: 'jnb-log-analytics-module'
-  params: {
-    location: location
+  resource defaultWorkspace 'workspaces' = {
+    name: 'default'
+    properties: {
+      title: 'Default workspace'
+      description: 'Default workspace'
+    }
   }
 }
