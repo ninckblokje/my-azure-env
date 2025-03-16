@@ -132,7 +132,7 @@ resource jnbApim 'Microsoft.ApiManagement/service@2021-08-01' = {
   resource jnbApplicationInsightsDiagnostics 'diagnostics' = {
     name: 'applicationinsights'
     properties: {
-      loggerId: jnbApplicationInsights.id
+      loggerId: jnbApplicationInsightsLogger.id
       alwaysLog: 'allErrors'
       httpCorrelationProtocol: 'W3C'
       logClientIp: true
@@ -206,11 +206,11 @@ resource jnbApimDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-0
   }
 }
 
-// resource jnbManagedIdentityServiceReaderAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   name: 'jnb-managed-identity-service-reader-assignment'
-//   scope: jnbApim
-//   properties: {
-//     principalId: jnbManagedIdentity.properties.principalId
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '71522526-b88f-4d52-b57f-d31fc3546d0d')
-//   }
-// }
+resource jnbManagedIdentityServiceReaderAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('jnb-managed-identity', 'jnb-apim-service', 'reader-assignment')
+  scope: jnbApim
+  properties: {
+    principalId: jnbManagedIdentity.properties.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '71522526-b88f-4d52-b57f-d31fc3546d0d')
+  }
+}
