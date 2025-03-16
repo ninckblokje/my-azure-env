@@ -30,6 +30,10 @@ resource jnbManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@20
   name: 'jnb-managed-identity'
 }
 
+resource jnbApim 'Microsoft.ApiManagement/service@2021-08-01' existing = {
+  name: 'jnb-apim'
+}
+
 resource jnbApiCenter 'Microsoft.ApiCenter/services@2024-06-01-preview' = {
   name: 'jnb-api-center'
   location: location
@@ -48,6 +52,32 @@ resource jnbApiCenter 'Microsoft.ApiCenter/services@2024-06-01-preview' = {
     properties: {
       title: 'Default workspace'
       description: 'Default workspace'
+    }
+
+    resource jnbApimEnvironment 'environments' = {
+      name: 'jnb-apim-environment'
+      properties: {
+        title: 'jnb-apim environment'
+        kind: 'development'
+        server: {
+          type: 'Azure API Management'
+          managementPortalUri: []
+        }
+        customProperties: {}
+      }
+    }
+
+    resource jnbApimSource 'apiSources' = {
+      name: 'jnb-api-center-apim-link'
+      properties: {
+        azureApiManagementSource: {
+          resourceId: jnbApim.id
+          msiResourceId: jnbManagedIdentity.id
+        }
+        targetLifecycleStage: 'development'
+        importSpecification: 'always'
+        targetEnvironmentId: jnbApimEnvironment.id
+      }
     }
   }
 }
