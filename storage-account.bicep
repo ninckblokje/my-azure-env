@@ -27,6 +27,15 @@ param location string = resourceGroup().location
 
 param homeIp string = '127.0.0.1'
 
+resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
+  name: 'jnb-vnet'
+}
+
+resource jnbDefaultSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-05-01' existing = {
+  name: 'DefaultSubnet'
+  parent: jnbVnet
+}
+
 resource jnbStorageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: 'jnbdatastore'
   location: location
@@ -46,7 +55,12 @@ resource jnbStorageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
         }
       ]
       resourceAccessRules: []
-      virtualNetworkRules: []
+      virtualNetworkRules: [
+        {
+          action: 'Allow'
+          id: jnbDefaultSubnet.id
+        }
+      ]
     }
   }
 }

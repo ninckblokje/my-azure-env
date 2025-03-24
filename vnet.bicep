@@ -59,6 +59,11 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
       networkSecurityGroup: {
         id: jnbDefaultNsg.id
       }
+      serviceEndpoints: [
+        {
+          service: 'Microsoft.Storage'
+        }
+      ]
     }
   }
 
@@ -163,6 +168,14 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
       networkSecurityGroup: {
         id: jnbDefaultNsg.id
       }
+      delegations: [
+        {
+          name: 'aks-delegation'
+          properties: {
+            serviceName: 'Microsoft.ContainerService/managedClusters'
+          }
+        }
+      ]
     }
   }
 
