@@ -87,3 +87,39 @@ Example `base.params.json` file:
     }
 }
 ````
+
+### logic-apps.bicep parameters
+
+| Parameter | Default value | Description |
+|-|-|-|
+| jnbVnetGuid | | Resource GUID of jnb-vnet |
+
+````json
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "jnbVnetGuid": {
+            "value": ""
+        }
+    }
+}
+````
+
+### storage-account.bicep parameters
+
+| Parameter | Default value | Description |
+|-|-|-|
+| homeIp | 127.0.0.1/32 | IP address to whitelist |
+
+````json
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "homeIp": {
+            "value": "127.0.0.1/32"
+        }
+    }
+}
+````
