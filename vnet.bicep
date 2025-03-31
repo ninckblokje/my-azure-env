@@ -166,16 +166,17 @@ resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
     }
   }
 
-  resource jnbAksServiceSubnet 'subnets' = {
-    name: 'AksServiceSubnet'
-    dependsOn: [ jnbAksPoolSubnet ]
-    properties: {
-      addressPrefix: '10.0.9.0/24'
-      privateEndpointNetworkPolicies: 'Disabled'
-      privateLinkServiceNetworkPolicies: 'Enabled'
-      networkSecurityGroup: {
-        id: jnbDefaultNsg.id
-      }
-    }
-  }
+  // reserved for AKS services
+  // resource jnbAksServiceSubnet 'subnets' = {
+  //   name: 'AksServiceSubnet'
+  //   dependsOn: [ jnbAksPoolSubnet ]
+  //   properties: {
+  //     addressPrefix: '10.0.9.0/24'
+  //     privateEndpointNetworkPolicies: 'Disabled'
+  //     privateLinkServiceNetworkPolicies: 'Enabled'
+  //     networkSecurityGroup: {
+  //       id: jnbDefaultNsg.id
+  //     }
+  //   }
+  // }
 }

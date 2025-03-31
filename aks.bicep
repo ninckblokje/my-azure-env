@@ -33,6 +33,12 @@ param homeIp string = '127.0.0.1/32'
 @secure()
 param publicKey string = ''
 
+
+resource jnbAksManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: 'jnb-aks-managed-identity'
+  location: location
+}
+
 resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
   name: 'jnb-aks'
   location: location
@@ -62,9 +68,6 @@ resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
       azureKeyvaultSecretsProvider: {
         enabled: true
       }
-      extensionManager: {
-        enabled: true
-      }
     }
     dnsPrefix: 'jnb-aks'
     publicNetworkAccess: 'Enabled'
@@ -73,6 +76,7 @@ resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
         'IPv4'
       ]
       dnsServiceIP: '10.0.9.10'
+      loadBalancerSku: 'standard'
       networkPlugin: 'azure'
       podCidr: '10.0.7.0/24'
       serviceCidr: '10.0.9.0/24'
@@ -117,6 +121,22 @@ resource jnbAks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
     }
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${jnbAksManagedIdentity.id}': {}
+    }
+  }
+}
+
+resource jnbVnet 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
+  name: 'jnb-vnet'
+}
+
+resource jnbAksManagedIdentityReadRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('jnb-aks-managed-identity', 'jnb-aks', 'network-contributor')
+  scope: jnbVnet
+  properties: {
+    principalId: jnbAksManagedIdentity.properties.principalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4d97b98b-1d4f-4787-a291-c67834d212e7')
   }
 }
